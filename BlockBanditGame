@@ -1,0 +1,92 @@
+import pygame
+import random
+
+WIDTH  = 500
+HEIGHT = 400
+FPS = 30
+
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+
+playerImage = "blockBandit/BlockBandit.png"
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((50, 50))
+        self.image = pygame.image.load(playerImage).convert()
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.vx = 0
+        self.vy = 0
+
+
+
+pygame.init()
+pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Block Bandit")
+clock = pygame.time.Clock()
+
+all_sprites = pygame.sprite.Group()
+player = Player()
+all_sprites.add(player)
+
+def moveCharacter(object):
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        object.vx += -2
+    if keys[pygame.K_RIGHT]:
+        object.vx += 2
+
+    object.vx = object.vx * 0.9
+
+    if (abs(object.vx) < 1):
+        object.vx = 0
+
+    if (abs(object.vx) > 10):
+        if(object.vx < 0):
+            object.vx = -10
+        else:
+            object.vx = 10
+
+    object.rect.x += object.vx
+    object.rect.y += object.vy
+
+    object.acc = vec(0, 0.5)
+
+
+
+
+running = True
+while running:
+
+    clock.tick(FPS)
+
+
+
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+
+
+    moveCharacter(player)
+    #Update State
+    all_sprites.update()
+
+    #Render
+    screen.fill(BLACK)
+    all_sprites.draw(screen)
+    #screen.blit(player.icon, (20, 40))
+    pygame.display.flip()
+
+
+
+pygame.quit()

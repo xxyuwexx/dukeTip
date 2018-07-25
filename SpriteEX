@@ -1,0 +1,204 @@
+import pygame
+import random
+
+WIDTH  = 500
+HEIGHT = 400
+FPS = 30
+
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+
+playerImage = "blockBandit/BlockBandit.png"
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((50, 50))
+        self.image = pygame.image.load(playerImage).convert()
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.vx = 0
+        self.vy = 0
+        self.jumpReady = True
+        self.movePlatformLoop = 0
+
+class Platform(pygame.sprite.Sprite):
+    def __init__(self, x, y, w, h):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((w, h))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+def playerCollisions(object):
+
+    if(pygame.sprite.spritecollide(player, object, False)):
+        if(player.rect.bottom > object.rect.top):
+            player.rect.bottom = object.rect.top
+            player.vy = 0
+
+
+pygame.init()
+pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Block Bandit")
+clock = pygame.time.Clock()
+
+allPlatforms = pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
+player = Player()
+
+
+p1 = Platform(0, HEIGHT - 40, WIDTH, 50)
+p2 = Platform(0, HEIGHT / 2 + 60, 50, 15)
+p3 = Platform(100, HEIGHT / 2 - 40, 50, 15)
+p4 = Platform(360, HEIGHT / 2 - 40, 50, 15)
+p5 = Platform(450, HEIGHT / 2 - 130, 50, 15)
+p6 = Platform(120, HEIGHT / 2 - 150, 50, 15)
+p7 = Platform(0, HEIGHT / 2 - 230, 50, 15)
+p8 = Platform(120, HEIGHT / 2 - 280, 50, 15)
+p9 = Platform(400, HEIGHT / 2 - 280, 50, 15)
+p10 = Platform(450, HEIGHT / 2 - 380, 50, 15)
+
+
+
+all_sprites.add(p1)
+allPlatforms.add(p1)
+all_sprites.add(p2)
+allPlatforms.add(p2)
+allPlatforms.add(p3)
+all_sprites.add(p3)
+allPlatforms.add(p4)
+all_sprites.add(p4)
+allPlatforms.add(p5)
+all_sprites.add(p5)
+allPlatforms.add(p6)
+all_sprites.add(p6)
+allPlatforms.add(p7)
+all_sprites.add(p7)
+allPlatforms.add(p8)
+all_sprites.add(p8)
+allPlatforms.add(p9)
+all_sprites.add(p9)
+allPlatforms.add(p10)
+all_sprites.add(p10)
+
+
+all_sprites.add(player)
+
+
+def moveCharacter(object):
+
+    object.movePlatformLoop = 0
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        object.vx += -2
+    if keys[pygame.K_RIGHT]:
+        object.vx += 2
+
+
+    object.vx = object.vx * 0.9
+
+    if (abs(object.vx) < 1):
+        object.vx = 0
+
+    if (abs(object.vx) > 10):
+        if(object.vx < 0):
+            object.vx = -10
+        else:
+            object.vx = 10
+
+    object.vy = object.vy + 1
+
+    object.rect.x += object.vx
+    object.rect.y += object.vy
+
+
+    hits = pygame.sprite.spritecollide(object, allPlatforms, False)
+    if hits:
+
+
+        for platform in hits:
+            if(object.rect.bottom < platform.rect.bottom):
+                if(object.vy > 0):
+                    object.vy = 0
+                    object.xy = 0
+                    object.rect.bottom = platform.rect.top
+                    object.jumpReady = True
+
+            else:
+                    if(object.rect.top > platform.rect.top):
+                        object.rect.top = platform.rect.bottom
+                    else:
+                        if(object.rect.left < platform.rect.left and not object.rect.top > platform.rect.top):
+                            object.rect.right = platform.rect.left
+
+                        if(object.rect.right > platform.rect.right and not object.rect.top > platform.rect.top):
+                            object.rect.left = platform.rect.right
+
+
+        if keys[pygame.K_UP]:
+            if(object.vy == 0):
+                if(object.jumpReady == True):
+                    object.vy -= 14
+                    object.jumpReady = False
+
+
+    if(object.vy > 15):
+        object.vy = 15
+
+    if(object.vy < -15):
+        object.vy = -15
+
+    p1.rect.y += 1
+    p2.rect.y += 1
+    p3.rect.y += 1
+    p4.rect.y += 1
+    p5.rect.y += 1
+    p6.rect.y += 1
+    p7.rect.y += 1
+    p8.rect.y += 1
+    p9.rect.y += 1
+    p10.rect.y += 1
+
+    object.rect.y += 1
+
+
+running = True
+while running:
+
+    clock.tick(FPS)
+
+
+
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+
+
+    # Chek for collisions with ANY platform object
+
+
+
+    moveCharacter(player)
+    #Update State
+    all_sprites.update()
+
+    #Render
+    screen.fill(BLACK)
+    all_sprites.draw(screen)
+
+    #screen.blit(player.icon, (20, 40))
+    pygame.display.flip()
+
+
+
+pygame.quit()
